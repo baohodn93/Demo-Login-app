@@ -30,7 +30,8 @@ public class JwtResponse {
 		this.roles = roles;
 	}
 
-	public JwtResponse(String token, String name, Collection<? extends GrantedAuthority> authorities) {
+	public JwtResponse(Long id, String token, String name, Collection<? extends GrantedAuthority> authorities) {
+		this.id = id;
 		this.token = token;
 		this.name = name;
 		this.roles = authorities;

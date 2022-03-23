@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +33,7 @@ import com.blogjava.model.Role;
 import com.blogjava.model.RoleName;
 import com.blogjava.model.User;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -94,6 +96,9 @@ public class AuthController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String token = jwtProvider.createToken(authentication);
 		UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-		return ResponseEntity.ok(new JwtResponse(token, userPrinciple.getName(), userPrinciple.getAuthorities()));
+		return ResponseEntity.ok(new JwtResponse(userPrinciple.getId(),
+				token, 
+				userPrinciple.getName(), 
+				userPrinciple.getAuthorities()));
 	}
 }
