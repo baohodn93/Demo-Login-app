@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.enterprise.inject.New;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +15,21 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.blogjava.Security.Jwt.JwtProvider;
+import com.blogjava.Security.Jwt.JwtTokenFilter;
 import com.blogjava.Security.Userprincal.UserPrinciple;
 import com.blogjava.Service.impl.RoleServiceImpl;
 import com.blogjava.Service.impl.UserServiceImpl;
+import com.blogjava.dto.request.ChangeProfileForm;
 import com.blogjava.dto.request.SignInForm;
 import com.blogjava.dto.request.SignUpForm;
 import com.blogjava.dto.response.JwtResponse;
@@ -52,15 +57,18 @@ public class AuthController {
 
 	@Autowired
 	private JwtProvider jwtProvider;
+	
+	@Autowired
+	private JwtTokenFilter jwtTokenFilter;
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> register(@Valid @RequestBody SignUpForm signUpForm) {
 		if (userService.existsByUserName(signUpForm.getUsername())) {
-			return new ResponseEntity<>(new ResponseMessage("The username existed! Please try again!"), HttpStatus.OK);
+			return new ResponseEntity<>(new ResponseMessage("Username existed!"), HttpStatus.OK);
 		}
 
 		if (userService.existsByEmail(signUpForm.getEmail())) {
-			return new ResponseEntity<>(new ResponseMessage("The email existed! Please try again!"), HttpStatus.OK);
+			return new ResponseEntity<>(new ResponseMessage("Email existed!"), HttpStatus.OK);
 		}
 		User user = new User(signUpForm.getName(), signUpForm.getUsername(), signUpForm.getEmail(),
 				passWordEncode.encode(signUpForm.getPassword()));
@@ -101,4 +109,38 @@ public class AuthController {
 				userPrinciple.getName(), 
 				userPrinciple.getAuthorities()));
 	}
+	
+	@PutMapping("/change-profile")
+	public ResponseEntity<?> changeProfile(HttpServletRequest request,@Valid @RequestBody ChangeProfileForm changeProfileForm) {
+		String jwt = jwtTokenFilter.getJwt(request);
+		String username = jwtProvider.getUserNameFromToken(jwt);
+		User user;
+		try {
+		if (userService.existsByUserName(changeProfileForm.getUsername())) {
+		return new ResponseEntity<>(new ResponseMessage("Username existed"), HttpStatus.OK);
+		}
+		if (userService.existsByEmail(changeProfileForm.getEmail())) {
+		return new ResponseEntity<>(new ResponseMessage("Email existed"), HttpStatus.OK);
+		}
+		user = userService.findByUserName(username).orElseThrow(()-> new UsernameNotFoundException("User Not Found with -> username" + username));
+		user.setName(changeProfileForm.getName());
+		user.setEmail(changeProfileForm.getEmail());
+		user.setUserName(changeProfileForm.getUsername());
+		userService.save(user);
+		
+		return new ResponseEntity<>(new ResponseMessage("Update Successfully!"), HttpStatus.OK);
+		} catch (UsernameNotFoundException e) {
+		return new ResponseEntity<>(new ResponseMessage(e.getMessage()),HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

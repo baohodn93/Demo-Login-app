@@ -1,7 +1,6 @@
 package com.blogjava.Security.Userprincal;
 
-import javax.transaction.Transactional;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,7 +11,7 @@ import com.blogjava.model.User;
 import com.blogjava.repository.IUserRepository;
 
 @Service
-public class UserDetailService implements UserDetailsService{
+public class UserDetailsServiceImpl implements UserDetailsService{
 
 	@Autowired
 	private IUserRepository userRepository;
@@ -21,7 +20,7 @@ public class UserDetailService implements UserDetailsService{
 	@Transactional
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		User user = userRepository.findByUserName(username).orElseThrow(()->
-			new UsernameNotFoundException("User not found -> username or password" + username));
+			new UsernameNotFoundException("User not found with -> username or email" + username));
 		
 		return UserPrinciple.build(user);
 	}
