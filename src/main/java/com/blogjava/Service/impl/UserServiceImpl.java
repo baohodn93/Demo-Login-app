@@ -1,5 +1,6 @@
 package com.blogjava.Service.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,12 @@ public class UserServiceImpl implements IUserService {
 	public User save(User user) {
 
 		return userRepository.save(user);
+	}
+
+	@Override
+	public List<User> findAll() {
+		// TODO Auto-generated method stub
+		return userRepository.findAll();
 	}
 
 }

@@ -1,10 +1,9 @@
 package com.blogjava.controller;
 
-import java.nio.file.attribute.UserPrincipal;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.inject.New;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
@@ -18,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +30,7 @@ import com.blogjava.Security.Userprincal.UserPrinciple;
 import com.blogjava.Service.impl.RoleServiceImpl;
 import com.blogjava.Service.impl.UserServiceImpl;
 import com.blogjava.dto.request.ChangeProfileForm;
+import com.blogjava.dto.request.ResetPassword;
 import com.blogjava.dto.request.SignInForm;
 import com.blogjava.dto.request.SignUpForm;
 import com.blogjava.dto.response.JwtResponse;
@@ -37,6 +38,7 @@ import com.blogjava.dto.response.ResponseMessage;
 import com.blogjava.model.Role;
 import com.blogjava.model.RoleName;
 import com.blogjava.model.User;
+
 
 @CrossOrigin("*")
 @RestController
@@ -134,13 +136,23 @@ public class AuthController {
 		}
 	}
 	
+	@GetMapping("/list-user")
+	public ResponseEntity<List<User>> get(HttpServletRequest request) {
+		String jwt = jwtTokenFilter.getJwt(request);
+		String username = jwtProvider.getUserNameFromToken(jwt);
+		List<User> users = userService.findAll();
+
+		return new ResponseEntity<List<User>>(users, HttpStatus.OK);
+	}
 	
+	@PostMapping("/password-reset")
+	public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPassword resetPassword) {
+		if (userService.existsByEmail(resetPassword.getEmail())) {
+			return new ResponseEntity<>(new ResponseMessage("Email existed"), HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>(new ResponseMessage("Email does not exist"), HttpStatus.OK);
+	}
 	
-	
-	
-	
-	
-	
-	
-	
+
 }
