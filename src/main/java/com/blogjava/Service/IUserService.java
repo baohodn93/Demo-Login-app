@@ -13,4 +13,8 @@ public interface IUserService {
 	User save(User user);
 	
 	List<User> findAll();
+	
+    Optional<User> findByEmail(String email);
+
+    Optional<User> findByResetToken(String resetToken);
 }

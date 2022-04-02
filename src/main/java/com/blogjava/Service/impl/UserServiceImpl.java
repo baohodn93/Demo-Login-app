@@ -44,4 +44,16 @@ public class UserServiceImpl implements IUserService {
 		return userRepository.findAll();
 	}
 
+	@Override
+	public Optional<User> findByEmail(String email) {
+		// TODO Auto-generated method stub
+		return userRepository.findByEmail(email);
+	}
+
+	@Override
+	public Optional<User> findByResetToken(String resetToken) {
+		// TODO Auto-generated method stub
+		return userRepository.findByResetToken(resetToken);
+	}
+
 }
